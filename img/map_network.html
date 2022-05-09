@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+  #toggle {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    z-index: 100;
+  }
+
+  .map path {
+    fill: #eee;
+    stroke: #fff;
+    stroke-width: 2;
+  }
+
+  .links line {
+    stroke: #679;
+    stroke-opacity: 0.25;
+  }
+
+  .nodes circle {
+    fill: #679;
+    stroke: #235;
+    stroke-width: 2;
+  }
+
+  .tooltip {
+    position: absolute;
+    visibility: hidden;
+    background-color: #FFF;
+    display: flex;
+    font-family: "Georgia";
+    max-width: 500px;
+    opacity: 90%;
+  }
+
+  .tooltip div {
+    padding: 5px;
+  }
+
+  .tooltip span {
+    display: inline-block;
+    margin-top: 0px;
+    padding: 2px 10px;
+    border-radius: 2px;
+    font-size: 15px;
+    font-family: 'Georgia';
+  }
+
+  #legend-svg {
+    vertical-align: top;
+    float: left;
+    padding-left: 20px;
+  }
+</style>
+
+<body>
+  <div class="tooltip">
+    <span></span>
+  </div>
+  <svg id="legend-svg"></svg>
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script>
+
+    function linspace(start, end, n) {
+      var out = [];
+      var delta = (end - start) / (n - 1);
+
+      var i = 0;
+      while (i < (n - 1)) {
+        out.push(start + (i * delta));
+        i++;
+      }
+
+      out.push(end);
+      return out;
+    }
+
+    const tooltip = d3.select(".tooltip")
+      .style("background-color", "white")
+      .style("border", "solid")
+      .style("border-width", "2px")
+      .style("border-radius", "3px")
+      .style("padding", "1px")
+
+    var scales = {
+      'YlGnBu': ["#ffffd9", " #edf8b1", "#c7e9b4", "#7fcdbb", "#41b6c4", "#1d91c0", "#225ea8", "#253494", "#081d58"].reverse()
+    };
+
+    // create colour scale
+    var colorScale = d3.scaleLinear()
+      .domain(linspace(0, 50, scales["YlGnBu"].length))
+      .range(scales["YlGnBu"]);
+
+    var positioning = 'map'
+
+    var width = 600
+    var height = 400
+
+    var projection = d3.geoAlbersUsa()
+      .scale([width * 1.25])
+      .translate([width / 2, height / 2])
+
+    var path = d3.geoPath().projection(projection)
+
+    var linkForce = d3.forceLink()
+      .id(function (d) { return d.id })
+      .distance(40)
+
+    var simulation = d3.forceSimulation()
+      .force('link', linkForce)
+      .force('charge', d3.forceManyBody().strength(-160))
+      .force('center', d3.forceCenter(width / 2, height / 2))
+      .stop()
+
+    // var drag = d3.drag()
+    //   .on('start', dragStarted)
+    //   .on('drag', dragged)
+    //   .on('end', dragEnded)
+
+    d3.queue()
+      .defer(d3.json, 'https://raw.githubusercontent.com/duckmoll/data_host/main/mapgraph_data.json')
+      .defer(d3.json, 'https://raw.githubusercontent.com/duckmoll/data_host/main/continental-us.json')
+      .awaitAll(initialize)
+
+    function initialize(error, results) {
+      if (error) { throw error }
+
+      var graph = results[0]
+      var features = results[1].features
+
+      simulation.nodes(graph.nodes)
+        .on('tick', ticked)
+
+      simulation.force('link').links(graph.links)
+
+      var svg = d3.select('body')
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height)
+
+      // add the legend now
+      fullHeight = height
+      var legendFullHeight = fullHeight;
+      var legendFullWidth = 50;
+
+      var legendMargin = { top: 30, bottom: 20, left: 5, right: 30 };
+
+      // use same margins as main plot
+      var legendWidth = legendFullWidth - legendMargin.left - legendMargin.right;
+      var legendHeight = legendFullHeight - legendMargin.top - legendMargin.bottom;
+
+      var legendSvg = d3.select('#legend-svg')
+        .attr('width', legendFullWidth)
+        .attr('height', legendFullHeight)
+        .append('g')
+        .attr('transform', 'translate(' + legendMargin.left + ',' +
+          legendMargin.top + ')');
+
+      updateColourScale(scales['YlGnBu']);
+
+      // attach event listener to control
+      d3.select('#scale-select').on('change', function () {
+        var val = d3.select(this).node().value;
+        updateColourScale(scales[val]);
+      });
+
+      // update the colour scale, restyle the plot points and legend
+      function updateColourScale(scale) {
+
+        // style points
+        d3.selectAll('circle')
+          .attr('fill', function (d) {
+            return colorScale(d.z);
+          });
+
+        // clear current legend
+        legendSvg.selectAll('*').remove();
+
+        // append gradient bar
+        var gradient = legendSvg.append('defs')
+          .append('linearGradient')
+          .attr('id', 'gradient')
+          .attr('x1', '0%') // bottom
+          .attr('y1', '100%')
+          .attr('x2', '0%') // to top
+          .attr('y2', '0%')
+          .attr('spreadMethod', 'pad');
+
+        // programatically generate the gradient for the legend
+        // this creates an array of [pct, colour] pairs as stop
+        // values for legend
+        var pct = linspace(0, 100, scale.length).map(function (d) {
+          return Math.round(d) + '%';
+        });
+
+        var colourPct = d3.zip(pct, scale);
+
+        colourPct.forEach(function (d) {
+          gradient.append('stop')
+            .attr('offset', d[0])
+            .attr('stop-color', d[1])
+            .attr('stop-opacity', 1);
+        });
+
+        legendSvg.append('rect')
+          .attr('x1', 0)
+          .attr('y1', 0)
+          .attr('width', legendWidth)
+          .attr('height', legendHeight)
+          .style('fill', 'url(#gradient)');
+
+        // create a scale and axis for the legend
+        var legendScale = d3.scaleLinear()
+          .domain([0, 100])
+          .range([legendHeight, 0]);
+
+        var legendAxis = d3.axisRight(legendScale)
+          .ticks(5)
+          .tickFormat(d3.format("d"));
+
+        legendSvg.append("g")
+          .attr("class", "legend axis")
+          .attr("transform", "translate(" + legendWidth + ", 0)")
+          .call(legendAxis);
+      }
+
+      var map = svg.append('g')
+        .attr('class', 'map')
+        .selectAll('path')
+        .data(features)
+        .enter().append('path')
+        .attr('d', path)
+
+      // build the arrow.
+      svg.append("svg:defs").selectAll("marker")
+        .data(["end"])      // Different link/path types can be defined here
+        .enter().append("svg:marker")    // This section adds in the arrows
+        .attr("id", String)
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 15)
+        .attr("refY", -1.5)
+        .attr("markerWidth", 3)
+        .attr("markerHeight", 3)
+        .attr("orient", "auto")
+        .append("svg:path")
+        .attr("d", "M0,-5L10,0L0,5");
+
+      var links = svg.append('g')
+        .attr('class', 'links')
+        .selectAll('line')
+        .data(graph.links)
+        .enter().append('line')
+        .attr('stroke-width', 1)
+      // .attr("marker-end", "url(#end)");
+
+      var sizeScale = d3.scaleLinear()
+        .domain([0, 100])
+        .range([4, 30]);
+
+
+      var nodes = svg.append('g')
+        .attr('class', 'nodes')
+        .selectAll('circle')
+        .data(graph.nodes)
+        .enter().append('circle')
+        .attr('r', function (d) {
+          if (d.outgree >= 20) {
+            return 20
+          } else {
+            return 4
+          }
+        })
+        .style("fill", function (d) {
+          return colorScale(d.outgree)
+        })
+        .on("mouseover", function (d) {
+          tooltip
+            .select("span")
+            .attr("class", d.index)
+            .html(`${d.name}<br>${d.state}<br>Primary Contract:${d.outgree}<br>Sub Contract:${d.ingree}`);
+          tooltip.style("visibility", "visible");
+          d3.selectAll("line").filter(function (a) {
+            return a.target === d;
+          }).style("stroke", "orange")
+            .style("stroke-width", 5)
+            .attr("marker-end", "url(#end)");
+          d3.select(this)
+            .style("stroke", "orange")
+        })
+        .on('mousemove', function () {
+          tooltip.style('top', `${d3.mouse(this)[1] - 60}px`)
+            .style('left', `${d3.mouse(this)[0] + 100}px`)
+        })
+        .on("mouseout", function (d) {
+          d3.selectAll("line").filter(function (a) {
+            return a.target === d;
+          }).style("stroke", "#235")
+            .style("stroke-width", 1)
+            .attr("marker-end", "");
+          d3.select(this)
+            .style("stroke", "#235")
+          return tooltip.style("visibility", "hidden");
+        })
+
+
+      fixed(true)
+      function fixed(immediate) {
+        graph.nodes.forEach(function (d) {
+          var pos = projection([d.log, d.lat])
+          d.x = pos[0]
+          d.y = pos[1]
+        })
+
+        var t = d3.transition()
+          .duration(immediate ? 0 : 600)
+          .ease(d3.easeElastic.period(0.5))
+
+        update(links.transition(t), nodes.transition(t))
+      }
+
+      function ticked() {
+        update(links, nodes)
+      }
+
+      function update(links, nodes) {
+        links
+          .attr('x1', function (d) { return d.source.x })
+          .attr('y1', function (d) { return d.source.y })
+          .attr('x2', function (d) { return d.target.x })
+          .attr('y2', function (d) { return d.target.y })
+
+        nodes
+          .attr('cx', function (d) { return d.x })
+          .attr('cy', function (d) { return d.y })
+      }
+
+      // The scale you use for bubble size
+      const size = d3.scaleSqrt()
+        .domain([1, 100])  // What's in the data, let's say it is percentage
+        .range([1, 50])  // Size in pixel
+
+      // Add legend: circles
+      const valuesToShow = [{ "t": "Primary Contract<20", "v": 4 },
+      { "t": "Primary Contract>=20", "v": 20 }]
+      const xCircle = 20
+      const xLabel = 50
+      const yCircle = 330
+
+      svg
+        .selectAll("legend")
+        .data(valuesToShow)
+        .enter().append('circle')
+        .attr("cx", xCircle)
+        .attr("cy", d => yCircle - size(d.v))
+        .attr("r", d => size(d.v))
+        .style("fill", "none")
+        .attr("stroke", "black")
+
+      // Add legend: segments
+      svg
+        .selectAll("legend")
+        .data(valuesToShow)
+        .enter().append('line')
+        .attr('x1', d => xCircle + size(d.v))
+        .attr('x2', xLabel)
+        .attr('y1', d => yCircle - size(d.v))
+        .attr('y2', d => yCircle - size(d.v))
+        .attr('stroke', 'black')
+        .style('stroke-dasharray', ('2,2'))
+
+      // Add legend: labels
+      svg
+        .selectAll("legend")
+        .data(valuesToShow)
+        .enter().append('text')
+        .attr('x', xLabel)
+        .attr('y', d => yCircle - size(d.v))
+        .text(d => d.t)
+        .attr("font-size", 12)
+        .attr('alignment-baseline', 'middle')
+        .attr("font-family", "Georgia")
+    }
+
+  </script>
+</body>

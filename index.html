@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hypersonic Technology Supplier Risk</title>
+  <!-- Bootstrap -->
+  <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css'>
+  <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css'>
+  <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700'>
+  <link rel="stylesheet" href="css/flexslider.css" type="text/css">
+  <link href="css/queries.css" rel="stylesheet">
+  <link href="css/jquery.fancybox.css" rel="stylesheet">
+  <!-- Fonts -->
+  <link href="css/styles.css" rel="stylesheet">
+</head>
+
+<body data-spy="scroll" data-target="#navbar-example">
+  <div class="wrapper">
+    <nav class="nav__wrapper" id="navbar-example">
+      <ul class="nav">
+        <li role="presentation" class="active">
+          <a href="#section1">
+            <span class="nav__counter">Intro</span>
+          </a>
+        </li>
+        <li role="presentation">
+          <a href="#section2">
+            <span class="nav__counter">Data</span>
+          </a>
+        </li>
+        <li role="presentation">
+          <a href="#section3">
+            <span class="nav__counter">Analytics</span>
+          </a>
+        </li>
+        <li role="presentation">
+          <a href="#section4">
+            <span class="nav__counter">Conclusion</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <section class="intro" id="section1">
+      <div class="container">
+        <div class="row" style="padding-left: 50px;">
+          <div class="col-md-8 col-md-offset-2 text-center">
+            <h1 class="animated fadeInUpDelay">Hypersonic Technology Supplier Cyber Risk Assessment</h1>
+          </div>
+        </div>
+        <div class="row" style="padding-left: 30px;">
+          <div class="col-md-6">
+            <object data="img/intro_img.webp" type="text/html" width="100%" height="410px"
+              style="margin-top: 30px;"></object>
+            <p style="padding-left: 170px;margin-top: -5px;"><b>Cover Figure</b></p>
+          </div>
+          <div class="col-md-6">
+            <p style="font-size: 20px;">
+              This mini-project aims to analyze hypersonic technology supplier risk from the contract data of
+              USASpending. Major technology contracts are normally awarded to industry-leading companies (later referred
+              to as “primary contractors”), and they will delegate some parts of a contract to subcontractors. Given the
+              assumption that primary contractors have more resources and protection in cyber security, this project’s
+              focus is on their subcontractors, who are more vulnerable to cyber-attack. In essence, it will help NSA
+              rank hypersonic technology subcontractors, based on their risk attributes from contract data.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section calss="data" id="section2">
+      <div class="container">
+        <div class="row yelp">
+          <h2>Data</h2>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <img src="img/search.png" style="width:60%;height:280px;padding-left: 100px;">
+          </div>
+          <p class="fig_caption" style="padding-left:370px;width: 900px;"><b>FIGURE 1. </b>USASpending "Advanced Search"
+            Interface</p>
+        </div>
+        <div class="row">
+          <p>
+            USASpending website allows users to search and download primary contract data based on “year”, “keyword”,
+            and
+            other criteria(Figure 1). After aggregation, there are 47 primary contracts, shown in below Figure 2.
+          </p>
+        </div>
+        <div class="row">
+          <h3>
+            Primary Contracts
+          </h3>
+        </div>
+        <div class="row" style="padding-left: 30px;">
+          <figure class="figure">
+            <object data="img/primary_table.html" type="text/html" width="100%" height="440px"
+              style="padding-left:100px"></object>
+            <p class="fig_caption" style="padding-left: 150px; margin-top: -30px;width: 900px;"><b>FIGURE
+                2. (Click/Searchable)</b>
+              General inforamtion about primary contracts of Hypersonic Technology. One compnay may have multiple
+              locations and multiple contracts in the table.</p>
+          </figure>
+        </div>
+        <div class="row">
+          <p>
+            Since every primary award contract has a website, users can use that website to download
+            their subcontracts. This project uses “selenium” library in python to download
+            all 876 subcontracts, shown in below Figure 3.</p>
+          </p>
+        </div>
+        <div class="row">
+          <h3>
+            Subcontracts
+          </h3>
+        </div>
+        <div class="row" style="padding-left: 30px;">
+          <figure class="figure">
+            <object data="img/sub_table.html" type="text/html" width="100%" height="440px"
+              style="padding-left:100px"></object>
+            <p class="fig_caption" style="padding-left: 150px; margin-top: 0px;width: 850px;"><b>FIGURE 3.
+                (Click/Searchable)</b>
+              General inforamtion about subcontracts of Hypersonic Technology. One compnay may have multiple contracts
+              with the same amount of money and the same primary contractor.</p>
+          </figure>
+        </div>
+      </div>
+    </section>
+    <section class="analytics" id="section3">
+      <div class="container">
+        <div class="row">
+          <h2>
+            Analytics
+          </h2>
+        </div>
+        <div class="row">
+          <h3>
+            Subcontractors are scatted across the US
+          </h3>
+        </div>
+        <div class="row" style="padding-left: 100px;">
+          <div class="col-md-12">
+            <figure class="figure">
+              <object data="img/map_network.html" type="text/html" width="100%" height="450px"
+                style="padding-left: 100px;"></object>
+              <p class="fig_caption" style="padding-left: 110px; margin-top: 0px;width: 800px;"><b>FIGURE 4. (Hover)
+                </b> Geographical locations of primary contractors and subcontractors.
+                Arrow means from primary contractor to its subcontractor.
+              </p>
+            </figure>
+          </div>
+        </div>
+        <div class="row">
+          <p>Figure 4 shows two of the largest primary contractors are located in California, and another large one is
+            located in Alabama. These large companies delegate some parts of their contract to subcontractors near them,
+            and other parts to subcontractors across the country. Diverse location of subcontractors alleviates
+            geographical risk.</p>
+        </div>
+        <div class="row">
+          <h3>
+            There Are Four Dominating Primary Contractors
+          </h3>
+        </div>
+        <div class="row" style="padding-left: 150px;">
+          <figure class="figure">
+            <object data="img/primary_network.html" type="text/html" width="80%" height="400px"></object>
+            <p class="fig_caption" style="padding-left: 110px; margin-top: 0px;width: 900px;"><b>FIGURE 5.
+                (Hover)</b> Contract Network Chart(Color encoded by # of Primary Contractors)</p>
+          </figure>
+        </div>
+        <div class="row">
+          <p>
+            Figure 5 shows Lockheed Martin, Raytheon, Torch Technologies, and Aeroject Rocketdyne sign the largest
+            number
+            of primary contracts with the government, and
+            delegate them to subcontractors. They are the center of the hypersonic contract network. Most companies
+            don't have access to primary contracts.
+          </p>
+        </div>
+        <div class="row">
+          <h3>
+            Most Subcontractors Only Supply One Primary Contractor
+          </h3>
+        </div>
+        <div class="row" style="padding-left: 150px;">
+          <figure class="figure">
+            <object data="img/sub_network.html" type="text/html" width="80%" height="400px"></object>
+            <p class="fig_caption" style="padding-left: 110px; margin-top: 0px;width: 900px;"><b>FIGURE 6.
+                (Hover)</b> Contract Network Chart(Color encoded by # of Subcontractors)</p>
+          </figure>
+        </div>
+        <div class="row">
+          <p>
+            It can be seen from Figure 6 that some primary contractors can also be subcontracts, but they are not this
+            project's targets, since they are assumed to have better protection in cyber security. Very few
+            subcontractors supply more than one primary contractor.
+          </p>
+        </div>
+        <div class="row">
+          <h3>
+            Quantitative Attributes: the Number of Subcontracts and Subcontract Fundings Have Long Tail Distributions.
+            Most
+            Companies Supply Only One Primary Contractor.
+          </h3>
+        </div>
+        <div class="row" style="padding-left: 250px;">
+          <div class="col-md-3 col-md-offset-1" style="width: 40%;height:220px">
+            <object data="img/sub_count.html" type="text/html" width="100%" height="400px"></object>
+          </div>
+          <div class="col-md-3" style="width: 40%;height:220px">
+            <object data="img/sub_amount.html" type="text/html" width="100%" height="400px"></object>
+          </div>
+          <div class="col-md-8" style="width: 100%;margin-top: 50px;height:230px;padding-left:220px;">
+            <object data="img/sub_contractors_pie.html" type="text/html" width="100%" height="400px"></object>
+          </div>
+        </div>
+        <p class="fig_caption" style="padding-left: 410px; padding-top: -300px;width: 900px;"><b>FIGURE 7.
+            (Hover)</b> (Topleft)Density plot of # of subcontracts. (Topright)Density plot of natural log of
+          subcontract funding. (Bottom)Pie Chart of # of supplied primary contractors.</p>
+        <div class="row">
+          <h3>
+            Ranking Subcontractors by Attributes
+          </h3>
+        </div>
+        <div class="row">
+          <p>Quantitative attributes from Figure 7 can be used to measure subcontractor importance. Below are the top
+            five
+            companies of each attribute.</p>
+        </div>
+        <div class="row">
+          <ul>
+            <li><b>Most Subcontracts:</b> OPTICAL SCIENCES CORPORATION, HONEYWELL INTERNATIONAL INC., <span
+                style="color:#FF2E00">PACIFIC SCIENTIFIC
+                ENERGETIC MATERIALS COMPANY</span>, <span style="color:#5D3FD3">ENSIGN-BICKFORD AEROSPACE & DEFENSE
+                COMPANY</span>, DUCOMMUN LABARGE
+              TECHNOLOGIES,
+              INC.</li>
+            <li><b>Most Funding:</b> <span style="color:#5D3FD3">ENSIGN-BICKFORD AEROSPACE & DEFENSE
+                COMPANY</span>,
+              UNIVERSITY OF TENNESSEE, VISION
+              CENTRIC INC., <span style="color:#FF2E00">PACIFIC SCIENTIFIC ENERGETIC MATERIALS COMPANY</span>>, OPTICAL
+              SCIENCES CORPORATION</li>
+            <li><b>Supply Most Primary Contractors:</b> TRI MODELS, INC., <span style="color:#FF2E00">PACIFIC SCIENTIFIC
+                ENERGETIC MATERIALS COMPANY</span>,
+              HONEYWELL INTERNATIONAL INC., <span style="color:#5D3FD3">ENSIGN-BICKFORD AEROSPACE & DEFENSE
+                COMPANY</span>,
+              MATERIALS RESEARCH & DESIGN INC
+            </li>
+          </ul>
+        </div>
+        <div class="row">
+          <h3>
+            There is No Monopoly on Hypersonic Technology that Only One Single Subcontractor Can Provide
+          </h3>
+        </div>
+        <div class="row">
+          <p>After applying some NLP techniques including lemmatizing, pos-tagging, and Tf-Idf on each
+            subcontract's description, some words jump out as rare and important. These words are “accelerometer”,
+            “amplifier”, “antenna”, “transducers”, “university”, etc.</p>
+          <p>However, this project can find more than one subcontractor with description having the above words. There
+            is no
+            word only appearing in one subcontractor's description, meaning no subcontractor has a unique
+            technology. Subcontractors may have more delicate differences than they show in these contracts'
+            descriptions, and that analysis requires more information and domain knowledge.</p>
+        </div>
+      </div>
+    </section>
+    <section class="conclusion" id="section4">
+      <div class="container">
+        <div class="row">
+          <h1>
+            Conclusion
+          </h1>
+        </div>
+        <div class="row">
+          <p>
+            From the geographical analysis, we find subcontractors are scatted across the US. From the network analysis,
+            we find there are four major hypersonic companies having access to primary contracts, and they delegate that
+            to different subcontractors.
+          </p>
+          <p>
+            We find we can use the number of subcontracts, funding amount, and the number of supplied primary
+            contractors as quantitative attributes to prioritize cyber risk. Most of the subcontractors have little
+            funding and only supply one primary contractor, while a few have a lot of funding and supply more than one
+            primary contractor. Among them, <span style="color:#FF2E00">Pacific Scientific Energetic Materials
+              Company</span> and <span style="color:#5D3FD3">Ensign-Bickford Aerospace
+              & Defense Company</span> are the most important ones.
+          </p>
+          <p>
+            Finally, NLP methods help us find that no subcontractor has a unique technology, thus there is no single
+            point of failure.
+          </p>
+        </div>
+      </div>
+    </section>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="js/jquery.fancybox.pack.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/scripts.js?v=1.7"></script>
+    <script src="js/jquery.flexslider.js"></script>
+    <script src="js/jquery.smooth-scroll.js"></script>
+    <script src="js/modernizr.js"></script>
+    <script src="js/waypoints.min.js"></script>
+  </div>
+</body>
+
+</html>
