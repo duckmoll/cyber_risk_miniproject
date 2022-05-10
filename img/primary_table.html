@@ -15,6 +15,11 @@
     font-size: 10px;
     font-family: Georgia;
   }
+
+  thead {
+    font-size: 15px;
+    font-family: Georgia;
+  }
 </style>
 
 <body>
@@ -24,16 +29,16 @@
 
     d3.csv("https://raw.githubusercontent.com/duckmoll/data_host/main/table_data.csv", function (d) {
       return {
-        awardee: d.prime_awardee_name,
-        action_date: d.prime_award_base_action_date,
-        award_amount: d.prime_award_amount,
-        awardee_state: d.prime_awardee_state_name,
-        award_description: d.prime_award_description
+        "Primary Contractors": d.prime_awardee_name,
+        "Date": d.prime_award_base_action_date,
+        "Funding Amount": d.prime_award_amount,
+        "State": d.prime_awardee_state_name,
+        "Description": d.prime_award_description
       };
     }, function (error, gene_data) {
       var table_plot = makeTable()
         .datum(gene_data)
-        .sortBy('awardee', true)
+        .sortBy('Primary Contractors', true)
       // .filterCols(['col', 'x', 'y']);
 
       d3.select('#container').call(table_plot);
