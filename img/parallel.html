@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v6.js"></script>
+<style>
+  .tooltip {
+    position: absolute;
+    visibility: hidden;
+    background-color: #FFF;
+    display: flex;
+    font-family: "Georgia";
+    max-width: 500px;
+    font-size: 15px;
+  }
+
+  .tooltip div {
+    padding: 5px;
+  }
+
+  .tooltip span {
+    display: inline-block;
+    margin-top: 5px;
+    padding: 2px 10px;
+    border-radius: 2px;
+    font-weight: bold;
+    font-size: 15px;
+    font-family: "Georgia";
+  }
+</style>
+<!-- Create a div where the graph will take place -->
+<div class="tooltip">
+  <div>
+    <span></span>
+  </div>
+</div>
+<div id="my_dataviz"></div>
+
+<script>
+
+  // set the dimensions and margins of the graph
+  const margin = { top: 30, right: 70, bottom: 10, left: 40 },
+    width = 800 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
+
+  // append the svg object to the body of the page
+  const svg = d3.select("#my_dataviz")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform",
+      `translate(${margin.left},${margin.top})`);
+
+
+  d3.csv("https://raw.githubusercontent.com/duckmoll/data_host/main/subcontracts.csv").then(function (data) {
+    // Color scale: give me a specie name, I return a color
+    const color = d3.scaleOrdinal()
+      .domain([1, 2, 3])
+      .range(["#f25f5c", "#ffe066", "#70c1b3", "#ffe066", "#70c1b3", "#70c1b3", "#70c1b3"])
+
+    // Here I set the list of dimensions manually to control the order of axis:
+    dimensions = ["sub_contractors", "subawardee_contracts", "subawardee_sum"]
+
+    // For each dimension, I build a linear scale. I store all in a y object
+    const y = {}
+    y["sub_contractors"] = d3.scaleLinear().domain([1, 3]).range([height, margin.top])
+    y["subawardee_contracts"] = d3.scaleLinear().domain([0, 30]).range([height, margin.top])
+    y["subawardee_sum"] = d3.scaleLinear().domain([5000, 25000000]).range([height, margin.top])
+
+
+    // Build the X scale -> it find the best position for each Y axis
+    x = d3.scalePoint()
+      .range([margin.left, width])
+      .domain(dimensions);
+
+    const Tooltip = d3.select(".tooltip")
+      .style("background-color", "white")
+      .style("border", "solid")
+      .style("border-width", "2px")
+      .style("border-radius", "3px")
+      .style("padding", "1px")
+
+    // Highlight the specie that is hovered
+    var mouseover = function (event, d) {
+      Tooltip
+        .select("span")
+        .attr("class", d.id)
+        .html("Company: " + d.company)
+        .attr("font-family", "Georgia")
+        .style("font-size", "15px")
+
+      Tooltip.style("visibility", "visible");
+      // d3.select(this)
+      //   .style("opacity", 1)
+      selected_specie = d.id
+      // first every group turns grey
+      svg.selectAll(".line")
+        .transition().duration(200)
+        .style("stroke", "white")
+        .style("opacity", "0.1")
+      // Second the hovered specie takes its color
+      svg.selectAll("." + selected_specie)
+        .transition().duration(200)
+        .style("stroke", color(d.sub_contractors))
+        .style("opacity", "5")
+    }
+
+
+    var mousemove = function (event, d) {
+      Tooltip.style("visibility", "visible");
+      Tooltip
+        .style("top", (d3.pointer(event)[1]) + "px")
+        .style("left", (d3.pointer(event)[0]) + 70 + "px")
+    }
+
+
+    // Unhighlight
+    var mouseleave = function (event, d) {
+      Tooltip
+        .style("visibility", "hidden")
+      // d3.select(this)
+      //   .style("stroke", "none")
+      //   .style("opacity", 0.8)
+      svg.selectAll(".line")
+        .transition().duration(200).delay(1000)
+        .style("stroke", function (d) { return (color(d.sub_contractors)) })
+        .style("opacity", "1")
+    }
+
+    // The path function take a row of the csv as input, and return x and y coordinates of the line to draw for this raw.
+    function path(d) {
+      return d3.line()(dimensions.map(function (p) { return [x(p), y[p](d[p])]; }));
+    }
+
+    // Draw the lines
+    var line = svg
+      .selectAll("myPath")
+      .data(data)
+      .join("path")
+      .attr("class", function (d) { return "line " + d.id }) // 2 class for each line: 'line' and the group name
+      .attr("d", path)
+      .style("fill", "none")
+      .style("stroke", function (d) { return (color(d.sub_contractors)) })
+      .style("opacity", 1)
+      .style('stroke-width', 2.5)
+      .on("mouseover", mouseover)
+      .on("mouseleave", mouseleave)
+      .on("mousemove", mousemove)
+
+
+    const convert = { "sub_contractors": "Primary Contractors", "subawardee_contracts": "Sub Contracts", "subawardee_sum": "Funding Amount" }
+
+    // Draw the axis
+    svg.selectAll("myAxis")
+      // For each dimension of the dataset I add a 'g' element
+      .data(dimensions).enter()
+      .append("g")
+      .attr("class", "axis")
+      // I translate this element to its right position on the x axis
+      .attr("transform", function (d) { return `translate(${x(d)})` })
+      // And I build the axis with the call function
+      .each(function (d) { d3.select(this).call(d3.axisLeft().ticks(5).scale(y[d])); })
+      // Add axis title
+      .append("text")
+      .style("font-size", "15px")
+      .attr("font-family", "Georgia")
+      .style("text-anchor", "middle")
+      .attr("y", 10)
+      .text(function (d) { return convert[d]; })
+      .style("fill", "black")
+
+
+    const colors_list = ["#70c1b3", "#ffe066", "#f25f5c"]
+    // svg.append("text").attr("x", 925).attr("y", 50).text("Star").attr("font-family", "Georgia").style("font-size", "15px")
+    svg.append("circle").attr("cx", 720).attr("cy", 72).attr("r", 6).style("fill", colors_list[0])
+    svg.append("circle").attr("cx", 720).attr("cy", 102).attr("r", 6).style("fill", colors_list[1])
+    svg.append("circle").attr("cx", 720).attr("cy", 132).attr("r", 6).style("fill", colors_list[2])
+    svg.append("text").attr("x", 730).attr("y", 75).text("3").style("font-size", "15px").attr("font-family", "Georgia").attr("alignment-baseline", "middle")
+    svg.append("text").attr("x", 730).attr("y", 105).text("2").style("font-size", "15px").attr("font-family", "Georgia").attr("alignment-baseline", "middle")
+    svg.append("text").attr("x", 730).attr("y", 135).text("1").style("font-size", "15px").attr("font-family", "Georgia").attr("alignment-baseline", "middle")
+
+
+
+    //svg.append('image')
+    //    .attr('xlink:href', 'https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?fit=crop&w=200&h=200')
+    //   .attr('width', 30)
+    //    .attr('height', 30)
+
+
+  })
+</script>
